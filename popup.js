@@ -1,5 +1,5 @@
 /*
- * This function may take in parameter of initialTime , followUpTime and duration
+ * This function may take in parameter of initialTime , followUpTime and duration, numberofCards
  * Usage in sequence order:
   * popupInit()
   * 1) Wait for 10 seconds, display appear for 5 seconds (exclusive of 1 second entrance and 1 second exit).
@@ -13,7 +13,7 @@
   * 3) Wait for 13 seconds, the interval time retrieve next data and display again
   * 4) Repeat step 3
   * 
-  * User is able to click the display with the following: ,
+  * User is able to click the display with the following:
     * close (x) to close the display.
     * others open a new tab directs them to ratex.co products or coupons depending on the display shown.
   * Notes:
@@ -25,20 +25,31 @@
 */
 // closure used lexical scoping such that other functions are not be able to called
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures
+
+/**
+ * @param  {number} initialTime   Time in milliseconds for waiting to show the first popup.
+ * @param  {number} interval      Time in milliseconds between each popup.
+ * @param  {number} duration      Time in milliseconds where pop up stays on. This is exclusive of 1 second fade-in and 1 second fade-out animation.
+ * @param  {number} numberOfCards Customize how many cards to read per poll of api feed, as per polling initialTime and interval specified in popupInit.
+*/
 function popupInit(initialTime = 10000, interval = 5000, duration = 5000, numberOfCards = 5) {
-  let popupData = {};
-  let repeatIdCheck = [];
-  let initialTimer;
-  let intervalTimer;
-  let durationTimer;
+  let popupData = {}; // Object for storing the data to display out the popup.
+  let repeatIdCheck = []; // An array used to check the id of the data.
+  let initialTimer; // Timer where the popup retrieves the data initially.
+  let intervalTimer; //  Timer where the popup retrieves the data at an interval.
+  let durationTimer; // Timer where pop up stays on. This is exclusive of 1-second fade-in and 1-second fade-out animation
+
 
   let trigger = {
-    timeOutFlag : false,
-    onMouseOver : false,
+    timeOutFlag : false, // Boolean for an indication that the durationTimer has run out.
+    onMouseOver : false, // oolean for an indication whether the user hovers over the popup or not.
   };
 
   // enum 
-  const localStorageKey = 'popupIdList';
+  // String for the id of the local storage.
+  const localStorageKey = 'popupIdList'; 
+
+  // Id/class style according to the CSS stylesheet
   const popup = {
     popupContainerClass: 'popupContainer',
     imageId: 'imageContent',
@@ -47,11 +58,15 @@ function popupInit(initialTime = 10000, interval = 5000, duration = 5000, number
     timeId: 'time',
     closeId: 'close'
   }
+
+  // The status of the popup
   const popupContainerStatus = {
-    out: 'popupContainerOut',
-    entrance: 'popupContainerEntrance',
-    exit: 'popupContainerExit',
+    out: 'popupContainerOut', // String for the popup does not display at all
+    entrance: 'popupContainerEntrance', // String for the popup fade in with the animation
+    exit: 'popupContainerExit', // String the popup fade out with animation
   }
+
+  // Time taken to fade out
   const fadeOutAnimationTime = 1000;
 
   // Set up the app fomo popup
@@ -62,10 +77,13 @@ function popupInit(initialTime = 10000, interval = 5000, duration = 5000, number
       repeatIdCheck = JSON.parse(localStorage.getItem(localStorageKey));
     }
     const popupContainer = document.getElementsByClassName(popup.popupContainerClass)[0];
+    
+    // Setting the default time for handling strange parameters
     const defaultRetreivalTime = 10000;
     const defaultDuration = 5000;
     const durationLimit = 2000;
     const defaultNumberOfCards = 5;
+    
     // Prevent calling popupSetup function twice
     if (!popupContainer) {
       if (typeof initialTime !== 'number' || initialTime < 0) {
@@ -234,7 +252,6 @@ function popupInit(initialTime = 10000, interval = 5000, duration = 5000, number
       }
       // update the check
       repeatIdCheck.push(popupData.id);
-      console.log('repeatIdCheck:', repeatIdCheck);
       localStorage.setItem(localStorageKey, JSON.stringify(repeatIdCheck));
       trigger.onMouseOver = false;
       trigger.timeOutFlag = false;
